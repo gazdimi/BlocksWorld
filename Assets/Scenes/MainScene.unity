@@ -491,6 +491,7 @@ MonoBehaviour:
   A: {fileID: 1869537732}
   B: {fileID: 1546758207}
   C: {fileID: 142993312}
+  Table: {fileID: 21223587}
   menu: {fileID: 592675365}
 --- !u!1 &705507993
 GameObject:

@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     public GameObject A;
     public GameObject B;
     public GameObject C;
+    public GameObject Table;
     public GameObject menu;
 
     //gets called before application starts
@@ -39,8 +40,9 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Breadth first search started...");
         menu.SetActive(false);
-        Debug.Log(Breadth_First_Search.Clear(A));
-        Debug.Log(Breadth_First_Search.Clear(B));
+        Breadth_First_Search.State solution = Breadth_First_Search.Search(A,B,C,Table);
+        //Debug.Log(Breadth_First_Search.Clear(A));
+        //Debug.Log(Breadth_First_Search.Clear(B));
     }
 
     //OnClick method
