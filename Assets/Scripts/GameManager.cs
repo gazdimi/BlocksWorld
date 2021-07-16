@@ -29,12 +29,6 @@ public class GameManager : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     //OnClick method
     public void BS_Start()
     {

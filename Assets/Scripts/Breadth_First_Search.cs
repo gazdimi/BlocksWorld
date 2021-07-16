@@ -2,12 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Breadth_First_Search
+public class Breadth_First_Search : MonoBehaviour
 {
     private static GameObject A;
     private static GameObject B;
     private static GameObject C;
     private static GameObject Table;
+
+    private static bool move = false;
+    public float speed = 1.0f;                                                                                  // Adjust the speed for the application
+    private static GameObject start;
+    private static GameObject target;
+
+
 
     public static bool Clear(GameObject gameObject)
     {
@@ -21,6 +28,21 @@ public class Breadth_First_Search
             return true;
         }
         return false;
+    }
+
+    void Update()
+    {
+        if (move)
+        {
+            float step = speed * Time.deltaTime; // calculate distance to move                                  // Move our position a step closer to the target.
+            start.transform.position = Vector3.MoveTowards(start.transform.position, target.transform.position, step);
+            Debug.Log("should move");
+            // Check if the position of the start and target are approximately equal
+            if (Vector3.Distance(transform.position, target.transform.position) < 0.001f)
+            {
+                move = false;
+            }
+        }
     }
 
     public static State Search(GameObject a, GameObject b, GameObject c, GameObject table) 
@@ -48,20 +70,65 @@ public class Breadth_First_Search
                 return current_state;
             }
             closed_set.Add(current_state);
-            
+            List<State> children = SequentialStates(current_state);
+            foreach (State child in children) 
+            {
+                if (!(closed_set.Contains(child)) || !(search_frontier.Contains(child)))
+                {
+                    search_frontier.Push(child);
+                }
+            }
         }
         return null;
     }
 
-    public List<State> SequentialStates(State current_state) {
+    public static List<State> SequentialStates(State current_state) { //x same for each block
         List<State> children = new List<State>();
+        State new_state = new State();
+        if (current_state.clear_on_top[C])                                                                  //C block clear on top
+        {
+            if (current_state.clear_on_top[B])                                                              //B block clear on top 
+            {
+
+                //movement B on top of C
+                move = true;
+                start = B;
+                target = C;
+
+                if (!move) {
+                    new_state.On(B, C);
+                    new_state.On(C, Table);
+                    new_state.On(A, Table);
+                    new_state.Clear(A);
+                    new_state.Clear(B);
+                    new_state.Clear(C);
+                    new_state.parent = current_state;
+                    children.Add(new_state);
+                }
+            }
+        }
+        else {
+            if (current_state.clear_on_top[B])
+            {
+
+
+
+            }
+            else {                                                                                          //A on top of C
+            
+            
+            }
+
+
+        }
         return children;
     }
 
     public class State {
 
         public Dictionary<GameObject, GameObject> on_top_of = new Dictionary<GameObject, GameObject>();     //(key) block on top of block or table (value) 
-        private Dictionary<GameObject,bool> clear_on_top = new Dictionary<GameObject, bool>();              //(key) block (value) clear on top
+        public Dictionary<GameObject,bool> clear_on_top = new Dictionary<GameObject, bool>();              //(key) block (value) clear on top
+        public State parent;
        
         public State() {  }
 
@@ -83,10 +150,24 @@ public class Breadth_First_Search
             {
                 clear_on_top.Add(x, true);
             }
+            else {
+                clear_on_top.Add(x, false);
+            }
+        }
+
+        public string GetOnTop(GameObject gameObject)
+        {
+            RaycastHit hit;
+            var ray = new Ray(gameObject.transform.position, gameObject.transform.TransformDirection(Vector3.up));
+            if (Physics.Raycast(ray, out hit, 25))
+            {
+                return hit.collider.name;
+            }
+            return null;
         }
 
         public bool ProblemSolved() {
-            if (on_top_of[A] == B && on_top_of[B]==C) {
+            if (on_top_of[A] == B && on_top_of[B]==C && on_top_of[C]==Table) {
                 return true;                                                                                //goal state, problem solved
             }
             return false;
