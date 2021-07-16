@@ -13,7 +13,8 @@ public class Breadth_First_Search : MonoBehaviour
     public float speed = 1.0f;                                                                                  // Adjust the speed for the application
     private static GameObject start;
     private static GameObject target;
-
+    private static float horizontal_distance = 0f;                                                              //zero movement
+    private static float vertical_distance = 0f;
 
 
     public static bool Clear(GameObject gameObject)
@@ -35,10 +36,19 @@ public class Breadth_First_Search : MonoBehaviour
         if (move)
         {
             float step = speed * Time.deltaTime; // calculate distance to move                                  // Move our position a step closer to the target.
-            start.transform.position = Vector3.MoveTowards(start.transform.position, target.transform.position, step);
+            if (horizontal_distance != 0f) 
+            {
+                start.transform.position = Vector3.MoveTowards(new Vector3( 0f, 0f, start.transform.position.z), new Vector3( 0f, 0f, target.transform.position.z), step);
+                horizontal_distance = Mathf.Abs(horizontal_distance - start.transform.position.z);
+            }
+            else if(vertical_distance != 0f){
+                start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, 0f), new Vector3(0f, target.transform.position.y, 0f), step);
+                vertical_distance = Mathf.Abs(vertical_distance - start.transform.position.y);
+            }
+            //start.transform.position = Vector3.MoveTowards(start.transform.position, target.transform.position, step); 
             Debug.Log("should move");
             // Check if the position of the start and target are approximately equal
-            if (Vector3.Distance(transform.position, target.transform.position) < 0.001f)
+            if (Vector3.Distance(new Vector3( 0f, start.transform.position.y, 0f), new Vector3( 0f, target.transform.position.y, 0f)) < 0.001f)
             {
                 move = false;
             }
@@ -91,6 +101,8 @@ public class Breadth_First_Search : MonoBehaviour
             {
 
                 //movement B on top of C
+                horizontal_distance = Mathf.Abs(C.transform.position.z - B.transform.position.z);
+                vertical_distance = Mathf.Abs(C.transform.position.y - B.transform.position.y) + 1f;
                 move = true;
                 start = B;
                 target = C;
