@@ -35,6 +35,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("Breadth first search started...");
         menu.SetActive(false);
         Breadth_First_Search.State solution = Breadth_First_Search.Search(A,B,C,Table);
+        //Breadth_First_Search.printSolution(solution);
+        
         //Debug.Log(Breadth_First_Search.Clear(A));
         //Debug.Log(Breadth_First_Search.Clear(B));
     }
