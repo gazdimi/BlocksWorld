@@ -90,7 +90,7 @@ public class Breadth_First_Search : MonoBehaviour
                 return current_state;
             }
             closed_set.Add(current_state);
-            List<State> children = SequentialStates(current_state); Debug.Log("children " + children.Count);
+            List<State> children = SequentialStates(current_state);
             foreach (State child in children) 
             {
                 if (!(closed_set.Contains(child)) || !(search_frontier.Contains(child)))
@@ -108,6 +108,8 @@ public class Breadth_First_Search : MonoBehaviour
 
         if (current_state.clear_on_top[A])                                                                  //A block clear on top [valid move]
         {
+            GameObject aboveBlock = current_state.on_top_of[A];
+
             //--------------------------------------move on the table-------------------------------------
             new_state = new State();
 
@@ -116,8 +118,20 @@ public class Breadth_First_Search : MonoBehaviour
             new_state.on_top_of.Add(C, current_state.on_top_of[C]);
 
             new_state.clear_on_top.Add(A, true);
-            new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
-            new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+            if (aboveBlock == B)
+            {
+                new_state.clear_on_top.Add(B, true);
+                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+            }
+            else if (aboveBlock == C)
+            {
+                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                new_state.clear_on_top.Add(C, true);
+            }
+            else {
+                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+            }
 
             if (new_state.validMove())
             {                                                                                               //check for best move
@@ -134,8 +148,13 @@ public class Breadth_First_Search : MonoBehaviour
                 new_state.on_top_of.Add(C, current_state.on_top_of[C]);
 
                 new_state.clear_on_top.Add(B, false);
-                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
                 new_state.clear_on_top.Add(A, true);
+                if (aboveBlock == C)
+                {
+                    new_state.clear_on_top.Add(C, true);
+                }else {
+                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                }
 
                 if (new_state.validMove())
                 {                                                                                           //check for best move
@@ -152,9 +171,14 @@ public class Breadth_First_Search : MonoBehaviour
                 new_state.on_top_of.Add(B, current_state.on_top_of[B]);
                 new_state.on_top_of.Add(C, current_state.on_top_of[C]);
 
-                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                
                 new_state.clear_on_top.Add(C, false);
                 new_state.clear_on_top.Add(A, true);
+                if (aboveBlock == B) {
+                    new_state.clear_on_top.Add(B, true);
+                } else {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                }
 
                 if (new_state.validMove())
                 {                                                                                           //check for best move
@@ -166,6 +190,8 @@ public class Breadth_First_Search : MonoBehaviour
 
         if (current_state.clear_on_top[B])                                                                  //B block clear on top [valid move]
         {
+            GameObject aboveBlock = current_state.on_top_of[B];
+
             //--------------------------------------move on the table-------------------------------------
             new_state = new State();
 
@@ -174,8 +200,20 @@ public class Breadth_First_Search : MonoBehaviour
             new_state.on_top_of.Add(C, current_state.on_top_of[C]);
 
             new_state.clear_on_top.Add(B, true);
-            new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
-            new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+            if (aboveBlock == A)
+            {
+                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                new_state.clear_on_top.Add(A, true);
+            }
+            else if (aboveBlock == C)
+            {
+                new_state.clear_on_top.Add(C, true);
+                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+            }
+            else {
+                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+            }
 
             if (new_state.validMove())
             {                                                                                               //check for best move
@@ -193,8 +231,14 @@ public class Breadth_First_Search : MonoBehaviour
                 new_state.on_top_of.Add(A, current_state.on_top_of[A]);
 
                 new_state.clear_on_top.Add(B, true);
-                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
                 new_state.clear_on_top.Add(A, false);
+                if (aboveBlock == C)
+                {
+                    new_state.clear_on_top.Add(C, true);
+                }
+                else {
+                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                }
 
                 if (new_state.validMove()) {                                                                //check for best move
                     new_state.parent = current_state;                                                       //keep previous state
@@ -212,7 +256,11 @@ public class Breadth_First_Search : MonoBehaviour
 
                 new_state.clear_on_top.Add(B, true);
                 new_state.clear_on_top.Add(C, false);
-                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                if (aboveBlock == A) {
+                    new_state.clear_on_top.Add(A, true);
+                } else{
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                }
 
                 if (new_state.validMove())
                 {                                                                                           //check for best move
@@ -224,6 +272,8 @@ public class Breadth_First_Search : MonoBehaviour
 
         if (current_state.clear_on_top[C])                                                                  //C block clear on top [valid move]
         {
+            GameObject aboveBlock = current_state.on_top_of[C];
+
             //--------------------------------------move on the table-------------------------------------
             new_state = new State();
 
@@ -231,9 +281,21 @@ public class Breadth_First_Search : MonoBehaviour
             new_state.on_top_of.Add(A, current_state.on_top_of[A]);
             new_state.on_top_of.Add(B, current_state.on_top_of[B]);
 
-            new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
             new_state.clear_on_top.Add(C, true);
-            new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+            if (aboveBlock == A)
+            {
+                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                new_state.clear_on_top.Add(A, true);
+            }
+            else if (aboveBlock == B) {
+                new_state.clear_on_top.Add(B, true);
+                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+            }
+            else
+            {
+                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+            }
 
             if (new_state.validMove())
             {                                                                                               //check for best move
@@ -250,9 +312,14 @@ public class Breadth_First_Search : MonoBehaviour
                 new_state.on_top_of.Add(B, current_state.on_top_of[B]);
                 new_state.on_top_of.Add(A, current_state.on_top_of[A]);
 
-                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
                 new_state.clear_on_top.Add(C, true);
                 new_state.clear_on_top.Add(A, false);
+                if (aboveBlock == B)
+                {
+                    new_state.clear_on_top.Add(B, true);
+                }else {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                }
 
                 if (new_state.validMove())
                 {                                                                                           //check for best move
@@ -271,7 +338,12 @@ public class Breadth_First_Search : MonoBehaviour
 
                 new_state.clear_on_top.Add(B, false);
                 new_state.clear_on_top.Add(C, true);
-                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                if (aboveBlock == A)
+                {
+                    new_state.clear_on_top.Add(A, true);
+                }else {
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                }
 
                 if (new_state.validMove())
                 {                                                                                           //check for best move
@@ -294,8 +366,9 @@ public class Breadth_First_Search : MonoBehaviour
         }
 
         Debug.Log("-------------Solution above-------");
-        for (int i = 0; i < path.Count; i++) {
-            State state = path[i];
+        for (int i = 0; i<path.Count; i++) {
+            State state = path[path.Count - i - 1];
+            Debug.Log("Move " + i);
             Debug.Log("A on top of " + state.on_top_of[A].name);
             Debug.Log("A clear on top " + state.clear_on_top[A] + "\n");
 
@@ -303,8 +376,9 @@ public class Breadth_First_Search : MonoBehaviour
             Debug.Log("B clear on top " + state.clear_on_top[B] + "\n");
 
             Debug.Log("C on top of " + state.on_top_of[C].name);
-            Debug.Log("C clear on top " + state.clear_on_top[C]);
+            Debug.Log("C clear on top " + state.clear_on_top[C] + "\n");
         }
+        return;
     }
 
     public class State {
