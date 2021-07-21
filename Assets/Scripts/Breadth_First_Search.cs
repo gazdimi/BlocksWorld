@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class Breadth_First_Search : MonoBehaviour
@@ -9,13 +10,9 @@ public class Breadth_First_Search : MonoBehaviour
     private static GameObject C;
     private static GameObject Table;
 
-    private static bool move = false;
+    
     public float speed = 1.0f;                                                                                  // Adjust the speed for the application
-    private static GameObject start;
-    private static GameObject target;
-    private static float horizontal_distance = 0f;                                                              //zero movement
-    private static float vertical_distance = 0f;
-
+    private static List<KeyValuePair<GameObject, GameObject>> movement = new List<KeyValuePair<GameObject, GameObject>>(); //key = start, value = target   
 
     public static bool Clear(GameObject gameObject)
     {
@@ -33,24 +30,21 @@ public class Breadth_First_Search : MonoBehaviour
 
     void Update()
     {
-        if (move)
+        if(movement.Count != 0) //while (move)
         {
-            float step = speed * Time.deltaTime; // calculate distance to move                                  // Move our position a step closer to the target.
-            if (horizontal_distance != 0f) 
-            {
-                start.transform.position = Vector3.MoveTowards(new Vector3( 0f, 0f, start.transform.position.z), new Vector3( 0f, 0f, target.transform.position.z), step);
-                horizontal_distance = Mathf.Abs(horizontal_distance - start.transform.position.z);
-            }
-            else if(vertical_distance != 0f){
-                start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, 0f), new Vector3(0f, target.transform.position.y, 0f), step);
-                vertical_distance = Mathf.Abs(vertical_distance - start.transform.position.y);
-            }
-            //start.transform.position = Vector3.MoveTowards(start.transform.position, target.transform.position, step); 
-            Debug.Log("should move");
+            // Move our position a step closer to the target.
+            float step = speed * Time.deltaTime; // calculate distance to move                                  
+            GameObject start = movement[0].Key;
+            GameObject target = movement[0].Value;
+
+            Debug.Log("START --> " + start.name + " TARGET --> " + target.name);
+            start.transform.position = Vector3.MoveTowards(start.transform.position, target.transform.position, step); 
+           
             // Check if the position of the start and target are approximately equal
             if (Vector3.Distance(new Vector3( 0f, start.transform.position.y, 0f), new Vector3( 0f, target.transform.position.y, 0f)) < 0.001f)
             {
-                move = false;
+                start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y + 1f, start.transform.position.z);
+                movement.RemoveAt(0);
             }
         }
     }
@@ -357,6 +351,7 @@ public class Breadth_First_Search : MonoBehaviour
     }
 
     public static void printSolution(State solution) {
+
         List<State> path = new List<State>();
         path.Add(solution);
         State parent = solution.parent;
@@ -365,9 +360,20 @@ public class Breadth_First_Search : MonoBehaviour
             parent = parent.parent;
         }
 
+        State previous = null;
         Debug.Log("-------------Solution above-------");
-        for (int i = 0; i<path.Count; i++) {
+        for (int i = 0; i<path.Count; i++) 
+        {
             State state = path[path.Count - i - 1];
+            if (previous != null)
+            {                                                                     //block movement
+                foreach (GameObject key in previous.on_top_of.Keys)
+                {
+                    if (previous.on_top_of[key] != state.on_top_of[key]) {
+                        movement.Add(new KeyValuePair<GameObject, GameObject>(key, state.on_top_of[key]));
+                    }
+                }
+            }
             Debug.Log("Move " + i);
             Debug.Log("A on top of " + state.on_top_of[A].name);
             Debug.Log("A clear on top " + state.clear_on_top[A] + "\n");
@@ -377,6 +383,8 @@ public class Breadth_First_Search : MonoBehaviour
 
             Debug.Log("C on top of " + state.on_top_of[C].name);
             Debug.Log("C clear on top " + state.clear_on_top[C] + "\n");
+            previous = state;
+
         }
         return;
     }
