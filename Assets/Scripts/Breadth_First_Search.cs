@@ -13,6 +13,7 @@ public class Breadth_First_Search : MonoBehaviour
     
     public float speed = 1.0f;                                                                                  // Adjust the speed for the application
     private static List<KeyValuePair<GameObject, GameObject>> movement = new List<KeyValuePair<GameObject, GameObject>>(); //key = start, value = target   
+    private static State possibleChild = null;
 
     public static bool Clear(GameObject gameObject)
     {
@@ -53,22 +54,13 @@ public class Breadth_First_Search : MonoBehaviour
     {
         A = a; B = b; C = c; Table = table;
         State initial_state = new State();
-        /*A B C
-        initial_state.on_top_of.Add(A,Table); 
-        initial_state.on_top_of.Add(B, Table); 
-        initial_state.on_top_of.Add(C, Table);
-        initial_state.Clear(A);
-        initial_state.Clear(B);
-        initial_state.Clear(C);*/
-
-        //B
-        //A  C
-        initial_state.on_top_of.Add(A, Table);
-        initial_state.on_top_of.Add(B, A);
-        initial_state.on_top_of.Add(C, Table);
-        initial_state.clear_on_top.Add(A, false);
-        initial_state.clear_on_top.Add(B, true);
-        initial_state.clear_on_top.Add(C, true);
+        
+        initial_state.on_top_of.Add(A, initial_state.GetDownName(A));
+        initial_state.on_top_of.Add(B, initial_state.GetDownName(B));
+        initial_state.on_top_of.Add(C, initial_state.GetDownName(C));
+        initial_state.clear_on_top.Add(A, initial_state.Clear(A));
+        initial_state.clear_on_top.Add(B, initial_state.Clear(B));
+        initial_state.clear_on_top.Add(C, initial_state.Clear(C));
 
         if (initial_state.ProblemSolved()) {
             return initial_state;
@@ -79,8 +71,10 @@ public class Breadth_First_Search : MonoBehaviour
         search_frontier.Push(initial_state);
         while (search_frontier.Count != 0) 
         {
+            Debug.Log("Working...");
             State current_state = search_frontier.Pop();                                                    //removes & returns the object at the top of the Stack
             if (current_state.ProblemSolved()) {
+                Debug.Log("Finished!");
                 return current_state;
             }
             closed_set.Add(current_state);
@@ -93,88 +87,98 @@ public class Breadth_First_Search : MonoBehaviour
                 }
             }
         }
+        Debug.Log("Not working...");
         return null;
     }
 
-    public static List<State> SequentialStates(State current_state) { 
+    public static List<State> SequentialStates(State current_state) {
         List<State> children = new List<State>();
         State new_state;
 
-        if (current_state.clear_on_top[A])                                                                  //A block clear on top [valid move]
+        if (current_state.clear_on_top[C])                                                                  //C block clear on top [valid move]
         {
-            GameObject aboveBlock = current_state.on_top_of[A];
+            GameObject aboveBlock = current_state.on_top_of[C];
 
             //--------------------------------------move on the table-------------------------------------
-            new_state = new State();
-
-            new_state.on_top_of.Add(A, Table);
-            new_state.on_top_of.Add(B, current_state.on_top_of[B]);
-            new_state.on_top_of.Add(C, current_state.on_top_of[C]);
-
-            new_state.clear_on_top.Add(A, true);
-            if (aboveBlock == B)
+            if (aboveBlock != Table)
             {
-                new_state.clear_on_top.Add(B, true);
-                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
-            }
-            else if (aboveBlock == C)
-            {
-                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                new_state = new State();
+
+                new_state.on_top_of.Add(C, Table);
+                new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
+
                 new_state.clear_on_top.Add(C, true);
-            }
-            else {
-                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
-                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
-            }
+                if (aboveBlock == A)
+                {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                    new_state.clear_on_top.Add(A, true);
+                }
+                else if (aboveBlock == B)
+                {
+                    new_state.clear_on_top.Add(B, true);
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                }
 
-            if (new_state.validMove())
-            {                                                                                               //check for best move
-                new_state.parent = current_state;                                                           //keep previous state
-                children.Add(new_state);
+                if (new_state.ValidMove())
+                {                                                                                               //check for best move
+                    new_state.parent = current_state;                                                           //keep previous state
+                    children.Add(new_state);
+                }
             }
 
             //---------------------------------move on top of another block--------------------------------
-            if (current_state.clear_on_top[B])                                                              //A can be placed on top of B
+            if (current_state.clear_on_top[A])                                                              //C can be placed on top of A
             {
                 new_state = new State();                                                                    //initialize & construct new state 
-                new_state.on_top_of.Add(A,B);
-                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
-                new_state.on_top_of.Add(C, current_state.on_top_of[C]);
 
-                new_state.clear_on_top.Add(B, false);
-                new_state.clear_on_top.Add(A, true);
-                if (aboveBlock == C)
+                new_state.on_top_of.Add(C, A);
+                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
+                new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+
+                new_state.clear_on_top.Add(C, true);
+                new_state.clear_on_top.Add(A, false);
+                if (aboveBlock == B)
                 {
-                    new_state.clear_on_top.Add(C, true);
-                }else {
-                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                    new_state.clear_on_top.Add(B, true);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
                 }
 
-                if (new_state.validMove())
+                if (new_state.ValidMove())
                 {                                                                                           //check for best move
                     new_state.parent = current_state;                                                       //keep previous state
                     children.Add(new_state);
                 }
             }
 
-            if (current_state.clear_on_top[C])                                                              //A can be placed on top of C
+            if (current_state.clear_on_top[B])                                                              //C can be placed on top of B
             {
-                new_state = new State();                                                                    //initialize & construct new state 
-                
-                new_state.on_top_of.Add(A, C);
-                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
-                new_state.on_top_of.Add(C, current_state.on_top_of[C]);
+                new_state = new State();
 
-                
-                new_state.clear_on_top.Add(C, false);
-                new_state.clear_on_top.Add(A, true);
-                if (aboveBlock == B) {
-                    new_state.clear_on_top.Add(B, true);
-                } else {
-                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                new_state.on_top_of.Add(C, B);
+                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
+                new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+
+                new_state.clear_on_top.Add(B, false);
+                new_state.clear_on_top.Add(C, true);
+                if (aboveBlock == A)
+                {
+                    new_state.clear_on_top.Add(A, true);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
                 }
 
-                if (new_state.validMove())
+                if (new_state.ValidMove())
                 {                                                                                           //check for best move
                     new_state.parent = current_state;                                                       //keep previous state
                     children.Add(new_state);
@@ -187,33 +191,36 @@ public class Breadth_First_Search : MonoBehaviour
             GameObject aboveBlock = current_state.on_top_of[B];
 
             //--------------------------------------move on the table-------------------------------------
-            new_state = new State();
+            if (aboveBlock != Table) {
+                new_state = new State();
 
-            new_state.on_top_of.Add(B, Table);
-            new_state.on_top_of.Add(A,current_state.on_top_of[A]);
-            new_state.on_top_of.Add(C, current_state.on_top_of[C]);
+                new_state.on_top_of.Add(B, Table);
+                new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+                new_state.on_top_of.Add(C, current_state.on_top_of[C]);
 
-            new_state.clear_on_top.Add(B, true);
-            if (aboveBlock == A)
-            {
-                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
-                new_state.clear_on_top.Add(A, true);
-            }
-            else if (aboveBlock == C)
-            {
-                new_state.clear_on_top.Add(C, true);
-                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
-            }
-            else {
-                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
-                new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
-            }
+                new_state.clear_on_top.Add(B, true);
+                if (aboveBlock == A)
+                {
+                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                    new_state.clear_on_top.Add(A, true);
+                }
+                else if (aboveBlock == C)
+                {
+                    new_state.clear_on_top.Add(C, true);
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                }
 
-            if (new_state.validMove())
-            {                                                                                               //check for best move
-                new_state.parent = current_state;                                                           //keep previous state
-                children.Add(new_state);
-            }
+                if (new_state.ValidMove())
+                {                                                                                               //check for best move
+                    new_state.parent = current_state;                                                           //keep previous state
+                    children.Add(new_state);
+                }
+            }   
 
             //---------------------------------move on top of another block--------------------------------
             if (current_state.clear_on_top[A])                                                              //B can be placed on top of A
@@ -234,7 +241,7 @@ public class Breadth_First_Search : MonoBehaviour
                     new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
                 }
 
-                if (new_state.validMove()) {                                                                //check for best move
+                if (new_state.ValidMove()) {                                                                //check for best move
                     new_state.parent = current_state;                                                       //keep previous state
                     children.Add(new_state);
                 }
@@ -256,7 +263,7 @@ public class Breadth_First_Search : MonoBehaviour
                     new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
                 }
 
-                if (new_state.validMove())
+                if (new_state.ValidMove())
                 {                                                                                           //check for best move
                     new_state.parent = current_state;                                                       //keep previous state
                     children.Add(new_state);
@@ -264,89 +271,96 @@ public class Breadth_First_Search : MonoBehaviour
             }
         }
 
-        if (current_state.clear_on_top[C])                                                                  //C block clear on top [valid move]
+        if (current_state.clear_on_top[A])                                                                  //A block clear on top [valid move]
         {
-            GameObject aboveBlock = current_state.on_top_of[C];
+            GameObject aboveBlock = current_state.on_top_of[A];
 
             //--------------------------------------move on the table-------------------------------------
-            new_state = new State();
-
-            new_state.on_top_of.Add(C, Table);
-            new_state.on_top_of.Add(A, current_state.on_top_of[A]);
-            new_state.on_top_of.Add(B, current_state.on_top_of[B]);
-
-            new_state.clear_on_top.Add(C, true);
-            if (aboveBlock == A)
+            if (aboveBlock != Table)
             {
-                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
-                new_state.clear_on_top.Add(A, true);
-            }
-            else if (aboveBlock == B) {
-                new_state.clear_on_top.Add(B, true);
-                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
-            }
-            else
-            {
-                new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
-                new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
-            }
+                new_state = new State();
 
-            if (new_state.validMove())
-            {                                                                                               //check for best move
-                new_state.parent = current_state;                                                           //keep previous state
-                children.Add(new_state);
-            }
-
-            //---------------------------------move on top of another block--------------------------------
-            if (current_state.clear_on_top[A])                                                              //C can be placed on top of A
-            {
-                new_state = new State();                                                                    //initialize & construct new state 
-                
-                new_state.on_top_of.Add(C, A);
+                new_state.on_top_of.Add(A, Table);
                 new_state.on_top_of.Add(B, current_state.on_top_of[B]);
-                new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+                new_state.on_top_of.Add(C, current_state.on_top_of[C]);
 
-                new_state.clear_on_top.Add(C, true);
-                new_state.clear_on_top.Add(A, false);
+                new_state.clear_on_top.Add(A, true);
                 if (aboveBlock == B)
                 {
                     new_state.clear_on_top.Add(B, true);
-                }else {
+                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                }
+                else if (aboveBlock == C)
+                {
                     new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                    new_state.clear_on_top.Add(C, true);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
                 }
 
-                if (new_state.validMove())
+                if (new_state.ValidMove())
+                {                                                                                               //check for best move
+                    new_state.parent = current_state;                                                           //keep previous state
+                    children.Add(new_state);
+                }
+            }
+
+            //---------------------------------move on top of another block--------------------------------
+            if (current_state.clear_on_top[B])                                                              //A can be placed on top of B
+            {
+                new_state = new State();                                                                    //initialize & construct new state 
+                new_state.on_top_of.Add(A, B);
+                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
+                new_state.on_top_of.Add(C, current_state.on_top_of[C]);
+
+                new_state.clear_on_top.Add(B, false);
+                new_state.clear_on_top.Add(A, true);
+                if (aboveBlock == C)
+                {
+                    new_state.clear_on_top.Add(C, true);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                }
+
+                if (new_state.ValidMove())
                 {                                                                                           //check for best move
                     new_state.parent = current_state;                                                       //keep previous state
                     children.Add(new_state);
                 }
             }
 
-            if (current_state.clear_on_top[B])                                                              //C can be placed on top of B
+            if (current_state.clear_on_top[C])                                                              //A can be placed on top of C
             {
-                new_state = new State();
-               
-                new_state.on_top_of.Add(C, B);
-                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
-                new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+                new_state = new State();                                                                    //initialize & construct new state 
 
-                new_state.clear_on_top.Add(B, false);
-                new_state.clear_on_top.Add(C, true);
-                if (aboveBlock == A)
+                new_state.on_top_of.Add(A, C);
+                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
+                new_state.on_top_of.Add(C, current_state.on_top_of[C]);
+
+
+                new_state.clear_on_top.Add(C, false);
+                new_state.clear_on_top.Add(A, true);
+                if (aboveBlock == B)
                 {
-                    new_state.clear_on_top.Add(A, true);
-                }else {
-                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                    new_state.clear_on_top.Add(B, true);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
                 }
 
-                if (new_state.validMove())
+                if (new_state.ValidMove())
                 {                                                                                           //check for best move
                     new_state.parent = current_state;                                                       //keep previous state
                     children.Add(new_state);
                 }
             }
         }
-
         return children;
     }
 
@@ -395,38 +409,33 @@ public class Breadth_First_Search : MonoBehaviour
         public Dictionary<GameObject, bool> clear_on_top = new Dictionary<GameObject, bool>();              //(key) block (value) clear on top
         public State parent;
 
+        //check conditions
+        public bool first = false;                                                                          //C on Table
+        public bool second = false;                                                                         //B on top of C
+        public bool third = false;                                                                          //A on top of B
+
         public State() { }
 
-        public void On(GameObject b, GameObject x) {                                                        //block b on top of x (block or table)
-            RaycastHit hit;
-            var ray = new Ray(x.transform.position, x.transform.TransformDirection(Vector3.up));
-            if (Physics.Raycast(ray, out hit, 25))
-            {
-                if (hit.collider.name.Equals(b.name)) {
-                    on_top_of.Add(b, x);
-                }
-            }
-        }
-
-        public void Clear(GameObject x) {                                                                   //a block can be placed on top of x
+        public bool Clear(GameObject x) {                                                                   //a block can be placed on top of x
             RaycastHit hit;
             var ray = new Ray(x.transform.position, x.transform.TransformDirection(Vector3.up));
             if (!Physics.Raycast(ray, out hit, 25))
             {
-                clear_on_top.Add(x, true);
+                return true;
             }
             else {
-                clear_on_top.Add(x, false);
+                return false;
             }
         }
 
-        public string GetOnTop(GameObject gameObject)
+        public GameObject GetDownName(GameObject gameObject)
         {
             RaycastHit hit;
-            var ray = new Ray(gameObject.transform.position, gameObject.transform.TransformDirection(Vector3.up));
+            var ray = new Ray(gameObject.transform.position, gameObject.transform.TransformDirection(Vector3.down));
             if (Physics.Raycast(ray, out hit, 25))
             {
-                return hit.collider.name;
+                //return hit.collider.name;
+                return hit.transform.gameObject;
             }
             return null;
         }
@@ -438,13 +447,35 @@ public class Breadth_First_Search : MonoBehaviour
             return false;
         }
 
-        public bool validMove() {
-            if (on_top_of[C] == Table) 
+        public bool ValidMove() {
+            /*if (on_top_of[C] == Table) 
             {
-                if (on_top_of[B] == C || on_top_of[A] == B) {
+                if (on_top_of[B] == C || on_top_of[A] == B || (on_top_of[A] == Table && on_top_of[B] == Table && on_top_of[C] == Table) ) {
                     return true;
                 }
+            }*/
+
+            if (on_top_of[C] == Table)
+            {
+                this.first = true;
             }
+            if(possibleChild != null)
+            {
+                if (possibleChild.first && on_top_of[B] == C)
+                {
+                    this.second = true;
+                }
+                if (possibleChild.second && on_top_of[A] == B)
+                {
+                    this.third = true;
+                }
+            }
+            
+            if ((this.first && !this.second) || this.second || this.third || (on_top_of[A] == Table && on_top_of[B] == Table && on_top_of[C] == Table)) {
+                possibleChild = this;
+                return true;
+            }
+
             return false;
         }
     }
