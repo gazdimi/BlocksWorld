@@ -15,36 +15,43 @@ public class Breadth_First_Search : MonoBehaviour
     private static List<KeyValuePair<GameObject, GameObject>> movement = new List<KeyValuePair<GameObject, GameObject>>(); //key = start, value = target   
     private static bool flag = false;
 
-    public static bool Clear(GameObject gameObject)
-    {
-        //return Physics.Raycast(gameObject.transform.position, gameObject.transform.TransformDirection(Vector3.up));
-
-        RaycastHit hit;
-        var ray = new Ray(gameObject.transform.position, gameObject.transform.TransformDirection(Vector3.up));
-        if (Physics.Raycast(ray, out hit, 25))
-        {
-            Debug.Log(hit.collider.name);
-            return true;
-        }
-        return false;
-    }
-
     void Update()
     {
-        if(movement.Count != 0) //while (move)
+        if(movement.Count != 0)
         {
             // Move our position a step closer to the target.
             float step = speed * Time.deltaTime; // calculate distance to move                                  
             GameObject start = movement[0].Key;
             GameObject target = movement[0].Value;
-
-            Debug.Log("START --> " + start.name + " TARGET --> " + target.name);
-            start.transform.position = Vector3.MoveTowards(start.transform.position, target.transform.position, step); 
            
-            // Check if the position of the start and target are approximately equal
-            if (Vector3.Distance(new Vector3( 0f, start.transform.position.y, 0f), new Vector3( 0f, target.transform.position.y, 0f)) < 0.001f)
+            if (target != Table)
             {
-                start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y + 1f, start.transform.position.z);
+                //move vertically
+                if (start.transform.position.y != target.transform.position.y + 1f)
+                {
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, target.transform.position.y + 1f, start.transform.position.z), step);
+                }
+                else
+                { //move horizontally
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, start.transform.position.y, target.transform.position.z), step);
+                }
+            }
+            else {
+                //move vertically
+                if (start.transform.position.y != target.transform.position.y + 0.5f)
+                {
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, target.transform.position.y + 0.5f, start.transform.position.z), step);
+                }
+                else
+                { //move horizontally
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, start.transform.position.y, target.transform.position.z), step);
+                }
+            }
+
+            // Check if the position of the start and target are approximately equal
+            if (Vector3.Distance(new Vector3(0f, 0f, start.transform.position.z), new Vector3(0f, 0f, target.transform.position.z)) < 0.001f)
+            {
+                start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y, start.transform.position.z);
                 movement.RemoveAt(0);
             }
         }
@@ -71,10 +78,8 @@ public class Breadth_First_Search : MonoBehaviour
         search_frontier.Push(initial_state);
         while (search_frontier.Count != 0) 
         {
-            Debug.Log("Working...");
             State current_state = search_frontier.Pop();                                                    //removes & returns the object at the top of the Stack
             if (current_state.ProblemSolved()) {
-                Debug.Log("Finished!");
                 return current_state;
             }
             closed_set.Add(current_state);
@@ -87,7 +92,6 @@ public class Breadth_First_Search : MonoBehaviour
                 }
             }
         }
-        Debug.Log("Not working...");
         return null;
     }
 
@@ -364,10 +368,9 @@ public class Breadth_First_Search : MonoBehaviour
         return children;
     }
 
-    public static void printSolution(State solution) {
+    public static void PrintSolution(State solution) {
 
-        List<State> path = new List<State>();
-        path.Add(solution);
+        List<State> path = new List<State> { solution };
         State parent = solution.parent;
         while (parent != null) {
             path.Add(parent);
