@@ -449,7 +449,6 @@ public class Breadth_First_Search : MonoBehaviour
             var ray = new Ray(gameObject.transform.position, gameObject.transform.TransformDirection(Vector3.down));
             if (Physics.Raycast(ray, out hit, 25))
             {
-                //return hit.collider.name;
                 return hit.transform.gameObject;
             }
             return null;

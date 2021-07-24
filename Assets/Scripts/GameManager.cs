@@ -22,7 +22,6 @@ public class GameManager : MonoBehaviour
             Destroy(this);
         }
         RandomPositions();
-        GameObject.Find("Retry").SetActive(false);
     }
 
     public void RandomPositions() {
@@ -101,5 +100,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("A* search started...");
         menu.SetActive(false);
+        Astar.State solution = Astar.Search(A, B, C, Table);
+        //Astar.PrintSolution(solution);
     }
 }

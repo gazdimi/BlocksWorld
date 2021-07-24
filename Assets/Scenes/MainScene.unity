@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 21223589}
   - component: {fileID: 21223588}
   - component: {fileID: 21223592}
+  - component: {fileID: 21223593}
   m_Layer: 0
   m_Name: Table
   m_TagString: Untagged
@@ -225,6 +226,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a14dbf4aeda3fb42bf9e8d065c86c0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  retry_canvas: {fileID: 509294149}
+  speed: 1
+--- !u!114 &21223593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 21223587}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993bd7f9f31a39c4bb36b86877c727e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   retry_canvas: {fileID: 509294149}
@@ -407,7 +422,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &509294150
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -501,8 +516,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   menu: {fileID: 592675365}
-  retry: {fileID: 509294149}
   yourButton: {fileID: 1407809123}
+  retry_canvas: {fileID: 509294149}
 --- !u!1 &592675365
 GameObject:
   m_ObjectHideFlags: 0

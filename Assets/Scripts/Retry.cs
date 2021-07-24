@@ -6,21 +6,38 @@ using UnityEngine.UI;
 
 public class Retry : MonoBehaviour
 {
+    public static Retry retry;
     public GameObject menu;
-    public GameObject retry;
     public Button yourButton;
+    public GameObject retry_canvas;
+    public static bool first_time = true;
 
-    // Start is called before the first frame update
-    void Start()
+    //gets called before application starts
+    private void Awake()
     {
-        Button btn = yourButton.GetComponent<Button>();
-        btn.onClick.AddListener(RetryAlgorithm);
+        if (retry == null)
+        {
+            retry = this;
+        }
+        else if (retry != this)
+        {
+            Destroy(this);
+        }
+    }
+
+    void Update()
+    {
+        if (first_time)
+        {
+            Button btn = yourButton.GetComponent<Button>();
+            btn.onClick.AddListener(RetryAlgorithm);
+            first_time = false;
+        }
     }
 
     public void RetryAlgorithm()
     {
         GameManager.game.RandomPositions();
         menu.SetActive(true);
-        retry.SetActive(false);
     }
 }
