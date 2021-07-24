@@ -13,7 +13,7 @@ public class Breadth_First_Search : MonoBehaviour
     
     public float speed = 1.0f;                                                                                  // Adjust the speed for the application
     private static List<KeyValuePair<GameObject, GameObject>> movement = new List<KeyValuePair<GameObject, GameObject>>(); //key = start, value = target   
-    private static State possibleChild = null;
+    private static bool flag = false;
 
     public static bool Clear(GameObject gameObject)
     {
@@ -409,11 +409,6 @@ public class Breadth_First_Search : MonoBehaviour
         public Dictionary<GameObject, bool> clear_on_top = new Dictionary<GameObject, bool>();              //(key) block (value) clear on top
         public State parent;
 
-        //check conditions
-        public bool first = false;                                                                          //C on Table
-        public bool second = false;                                                                         //B on top of C
-        public bool third = false;                                                                          //A on top of B
-
         public State() { }
 
         public bool Clear(GameObject x) {                                                                   //a block can be placed on top of x
@@ -448,34 +443,22 @@ public class Breadth_First_Search : MonoBehaviour
         }
 
         public bool ValidMove() {
-            /*if (on_top_of[C] == Table) 
-            {
-                if (on_top_of[B] == C || on_top_of[A] == B || (on_top_of[A] == Table && on_top_of[B] == Table && on_top_of[C] == Table) ) {
-                    return true;
-                }
-            }*/
 
-            if (on_top_of[C] == Table)
-            {
-                this.first = true;
-            }
-            if(possibleChild != null)
-            {
-                if (possibleChild.first && on_top_of[B] == C)
-                {
-                    this.second = true;
-                }
-                if (possibleChild.second && on_top_of[A] == B)
-                {
-                    this.third = true;
-                }
-            }
-            
-            if ((this.first && !this.second) || this.second || this.third || (on_top_of[A] == Table && on_top_of[B] == Table && on_top_of[C] == Table)) {
-                possibleChild = this;
+            if (!(flag) && on_top_of[C] == Table) {
+                flag = true;
                 return true;
             }
 
+            if (flag)                                                                                       //C is on the table, select the next best move
+            {
+                if ((on_top_of[C] == Table && on_top_of[B] == C && on_top_of[A] == B) ||
+                    (on_top_of[C] == Table && on_top_of[B] == C) ||
+                    (on_top_of[A] == Table && on_top_of[B] == Table && on_top_of[C] == Table))
+                {
+
+                    return true;
+                }
+            }
             return false;
         }
     }
