@@ -35,24 +35,32 @@ public class Breadth_First_Search : MonoBehaviour
                 { //move horizontally
                     start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, start.transform.position.y, target.transform.position.z), step);
                 }
-            }
-            else {
-                //move vertically
-                if (start.transform.position.y != target.transform.position.y + 0.5f)
+
+                // Check if the position of the start and target are approximately equal
+                if (Vector3.Distance(new Vector3(0f, 0f, start.transform.position.z), new Vector3(0f, 0f, target.transform.position.z)) < 0.001f)
                 {
-                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, target.transform.position.y + 0.5f, start.transform.position.z), step);
+                    start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y, start.transform.position.z);
+                    movement.RemoveAt(0);
+                }
+
+            }
+            else { //move block on top of the table
+                //move horizontally
+                if (start.transform.position.z != target.transform.position.z + 2f)
+                {
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, start.transform.position.y, target.transform.position.z + 2f), step);
                 }
                 else
-                { //move horizontally
-                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, start.transform.position.y, target.transform.position.z), step);
+                {//move vertically
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, target.transform.position.y + 0.5f, start.transform.position.z), step);
                 }
-            }
 
-            // Check if the position of the start and target are approximately equal
-            if (Vector3.Distance(new Vector3(0f, 0f, start.transform.position.z), new Vector3(0f, 0f, target.transform.position.z)) < 0.001f)
-            {
-                start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y, start.transform.position.z);
-                movement.RemoveAt(0);
+                // Check if the position of the start and target are approximately equal
+                if (Vector3.Distance(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, target.transform.position.y + 0.5f, start.transform.position.z)) < 0.001f)
+                {
+                    start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y, start.transform.position.z);
+                    movement.RemoveAt(0);
+                }
             }
         }
     }
