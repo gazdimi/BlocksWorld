@@ -29,7 +29,69 @@ public class Astar : MonoBehaviour
         initial_state.clear_on_top.Add(C, initial_state.Clear(C));
         initial_state.CalculateH();
         initial_state.g = 0;
+
+        if (initial_state.ProblemSolved())
+        {
+            return initial_state;
+        }
+        List<State> search_frontier = new List<State>();
+        List<State> closed_set = new List<State>();
+
+        search_frontier.Add(initial_state);
+        while (search_frontier.Count != 0)
+        {
+            List<int> costs = new List<int>();
+            foreach (State node in search_frontier)
+            {
+                costs.Add(node.h + node.g);
+            }
+            int index = costs.IndexOf(GetMin(costs));
+
+            State current_state = search_frontier[index];
+            search_frontier.RemoveAt(index);
+            if (current_state.ProblemSolved())
+            {
+                return current_state;
+            }
+            closed_set.Add(current_state);
+            List<State> children = SequentialStates(current_state);
+            foreach (State child in children)
+            {
+                if (closed_set.Contains(child) && (current_state.g < child.g))
+                {
+                    child.g = current_state.g;
+                    child.parent = current_state;
+                }
+                else if (search_frontier.Contains(child) && (current_state.g < child.g))
+                {
+                    child.g = current_state.g;
+                    child.parent = current_state;
+                }
+                else {
+                    search_frontier.Add(child);
+                    child.g = current_state.g;
+                }
+            }
+        }
         return null;
+    }
+    public static List<State> SequentialStates(State current_state)
+    {
+        List<State> children = new List<State>();
+        State new_state;
+
+
+        return children;
+    }
+
+    public static int GetMin(List<int> costs) {
+        int min = costs[0];
+        foreach (int cost in costs) {
+            if (cost < min) {
+                min = cost;
+            }
+        }
+        return min;
     }
 
     public class State
@@ -97,7 +159,13 @@ public class Astar : MonoBehaviour
             }
             else if (!(clear_on_top[B]) && on_top_of[B] != Table)
             {
-                _h += 2;
+                if (on_top_of[A] == B)
+                {
+                    _h += 2;
+                }
+                else {
+                    _h++;
+                }
             }
             else if (clear_on_top[B] && on_top_of[B] != C) {
                 _h++;
