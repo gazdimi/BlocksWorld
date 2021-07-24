@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Breadth_First_Search : MonoBehaviour
 {
+    public GameObject retry_canvas;
+
     private static GameObject A;
     private static GameObject B;
     private static GameObject C;
@@ -14,16 +16,17 @@ public class Breadth_First_Search : MonoBehaviour
     public float speed = 1.0f;                                                                                  // Adjust the speed for the application
     private static List<KeyValuePair<GameObject, GameObject>> movement = new List<KeyValuePair<GameObject, GameObject>>(); //key = start, value = target   
     private static bool flag = false;
+    private int retry = 0;
 
     void Update()
     {
-        if(movement.Count != 0)
+        if (movement.Count != 0)
         {
             // Move our position a step closer to the target.
             float step = speed * Time.deltaTime; // calculate distance to move                                  
             GameObject start = movement[0].Key;
             GameObject target = movement[0].Value;
-           
+
             if (target != Table)
             {
                 //move vertically
@@ -41,10 +44,12 @@ public class Breadth_First_Search : MonoBehaviour
                 {
                     start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y, start.transform.position.z);
                     movement.RemoveAt(0);
+                    retry++;
                 }
 
             }
-            else { //move block on top of the table
+            else
+            { //move block on top of the table
                 //move horizontally
                 if (start.transform.position.z != target.transform.position.z + 2f)
                 {
@@ -60,8 +65,12 @@ public class Breadth_First_Search : MonoBehaviour
                 {
                     start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y, start.transform.position.z);
                     movement.RemoveAt(0);
+                    retry++;
                 }
             }
+        }
+        else if(movement.Count==0 && retry != 0){ //solution done
+           retry_canvas.SetActive(true);
         }
     }
 

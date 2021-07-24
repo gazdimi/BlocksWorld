@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
             Destroy(this);
         }
         RandomPositions();
+        GameObject.Find("Retry").SetActive(false);
     }
 
     public void RandomPositions() {
