@@ -8,9 +8,7 @@ public class Retry : MonoBehaviour
 {
     public static Retry retry;
     public GameObject menu;
-    public Button yourButton;
     public GameObject retry_canvas;
-    public static bool first_time = true;
 
     //gets called before application starts
     private void Awake()
@@ -22,16 +20,6 @@ public class Retry : MonoBehaviour
         else if (retry != this)
         {
             Destroy(this);
-        }
-    }
-
-    void Update()
-    {
-        if (first_time)
-        {
-            Button btn = yourButton.GetComponent<Button>();
-            btn.onClick.AddListener(RetryAlgorithm);
-            first_time = false;
         }
     }
 
