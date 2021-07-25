@@ -17,6 +17,62 @@ public class Astar : MonoBehaviour
     private static bool flag = false;
     private int retry = 0;
 
+    void Update()
+    {
+        if (movement.Count != 0)
+        {
+            // Move our position a step closer to the target.
+            float step = speed * Time.deltaTime; // calculate distance to move                                  
+            GameObject start = movement[0].Key;
+            GameObject target = movement[0].Value;
+
+            if (target != Table)
+            {
+                //move vertically
+                if (start.transform.position.y != target.transform.position.y + 1f)
+                {
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, target.transform.position.y + 1f, start.transform.position.z), step);
+                }
+                else
+                { //move horizontally
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, start.transform.position.y, target.transform.position.z), step);
+                }
+
+                // Check if the position of the start and target are approximately equal
+                if (Vector3.Distance(new Vector3(0f, 0f, start.transform.position.z), new Vector3(0f, 0f, target.transform.position.z)) < 0.001f)
+                {
+                    start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y, start.transform.position.z);
+                    movement.RemoveAt(0);
+                    retry++;
+                }
+            }
+            else
+            { //move block on top of the table
+                //move horizontally
+                if (start.transform.position.z != target.transform.position.z + 2f)
+                {
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, start.transform.position.y, target.transform.position.z + 2f), step);
+                }
+                else
+                {//move vertically
+                    start.transform.position = Vector3.MoveTowards(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, target.transform.position.y + 0.5f, start.transform.position.z), step);
+                }
+
+                // Check if the position of the start and target are approximately equal
+                if (Vector3.Distance(new Vector3(0f, start.transform.position.y, start.transform.position.z), new Vector3(0f, target.transform.position.y + 0.5f, start.transform.position.z)) < 0.001f)
+                {
+                    start.transform.position = new Vector3(start.transform.position.x, start.transform.position.y, start.transform.position.z);
+                    movement.RemoveAt(0);
+                    retry++;
+                }
+            }
+        }
+        else if (movement.Count == 0 && retry != 0)
+        { //solution done
+            retry_canvas.SetActive(true);
+        }
+    }
+
     public static State Search(GameObject a, GameObject b, GameObject c, GameObject table) {
         A = a; B = b; C = c; Table = table;
         State initial_state = new State();
@@ -75,12 +131,245 @@ public class Astar : MonoBehaviour
         }
         return null;
     }
+
+    public static void PrintSolution(State solution)
+    {
+        List<State> path = new List<State> { solution };
+        State parent = solution.parent;
+        while (parent != null)
+        {
+            path.Add(parent);
+            parent = parent.parent;
+        }
+
+        State previous = null;
+        Debug.Log("-------------Solution above-------");
+        for (int i = 0; i < path.Count; i++)
+        {
+            State state = path[path.Count - i - 1];
+            if (previous != null)
+            {                                                                     //block movement
+                foreach (GameObject key in previous.on_top_of.Keys)
+                {
+                    if (previous.on_top_of[key] != state.on_top_of[key])
+                    {
+                        movement.Add(new KeyValuePair<GameObject, GameObject>(key, state.on_top_of[key]));
+                    }
+                }
+            }
+            Debug.Log("Move " + i);
+            Debug.Log("A on top of " + state.on_top_of[A].name);
+            Debug.Log("A clear on top " + state.clear_on_top[A] + "\n");
+
+            Debug.Log("B on top of " + state.on_top_of[B].name);
+            Debug.Log("B clear on top " + state.clear_on_top[B] + "\n");
+
+            Debug.Log("C on top of " + state.on_top_of[C].name);
+            Debug.Log("C clear on top " + state.clear_on_top[C] + "\n");
+            previous = state;
+        }
+        return;
+    }
+
     public static List<State> SequentialStates(State current_state)
     {
         List<State> children = new List<State>();
         State new_state;
 
+        if (current_state.clear_on_top[C])                                                                  //C block clear on top [valid move]
+        {
+            GameObject aboveBlock = current_state.on_top_of[C];
+            //--------------------------------------move on the table-------------------------------------
+            if (aboveBlock != Table)
+            {
+                new_state = new State();
 
+                new_state.on_top_of.Add(C, Table);
+                new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
+
+                new_state.h = current_state.h - 1;
+                new_state.g = current_state.g + 1;
+
+                new_state.clear_on_top.Add(C, true);
+                if (aboveBlock == A)
+                {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                    new_state.clear_on_top.Add(A, true);
+                }
+                else if (aboveBlock == B)
+                {
+                    new_state.clear_on_top.Add(B, true);
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                }
+
+                if (new_state.ValidMove())
+                {                                                                                               //check for best move
+                    new_state.parent = current_state;                                                           //keep previous state
+                    children.Add(new_state);
+                }
+            }
+        }
+
+        if (current_state.clear_on_top[B])                                                                  //B block clear on top [valid move]
+        {
+            GameObject aboveBlock = current_state.on_top_of[B];
+            if (current_state.clear_on_top[C])                                                              //B can be placed on top of C
+            {
+
+                new_state = new State();
+
+                new_state.on_top_of.Add(B, C);
+                new_state.on_top_of.Add(C, current_state.on_top_of[C]);
+                new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+
+                new_state.h = current_state.h - 1;
+                new_state.g = current_state.g + 1;
+
+                new_state.clear_on_top.Add(B, true);
+                new_state.clear_on_top.Add(C, false);
+                if (aboveBlock == A)
+                {
+                    new_state.clear_on_top.Add(A, true);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                }
+
+                if (new_state.ValidMove())
+                {                                                                                           //check for best move
+                    new_state.parent = current_state;                                                       //keep previous state
+                    children.Add(new_state);
+                }
+            }
+            else
+            {
+                //--------------------------------------move on the table-------------------------------------
+                if (aboveBlock != Table)
+                {
+                    new_state = new State();
+
+                    new_state.on_top_of.Add(B, Table);
+                    new_state.on_top_of.Add(A, current_state.on_top_of[A]);
+                    new_state.on_top_of.Add(C, current_state.on_top_of[C]);
+
+                    new_state.h = current_state.h - 1;
+                    new_state.g = current_state.g + 1;
+
+                    new_state.clear_on_top.Add(B, true);
+                    if (aboveBlock == A)
+                    {
+                        new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                        new_state.clear_on_top.Add(A, true);
+                    }
+                    else if (aboveBlock == C)
+                    {
+                        new_state.clear_on_top.Add(C, true);
+                        new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                    }
+                    else
+                    {
+                        new_state.clear_on_top.Add(A, current_state.clear_on_top[A]);
+                        new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                    }
+
+                    if (new_state.ValidMove())
+                    {                                                                                               //check for best move
+                        new_state.parent = current_state;                                                           //keep previous state
+                        children.Add(new_state);
+                    }
+                }
+            }
+        }
+
+        if (current_state.clear_on_top[A])                                                                  //A block clear on top [valid move]
+        {
+            GameObject aboveBlock = current_state.on_top_of[A];
+
+            //---------------------------------move on top of another block--------------------------------
+            if (current_state.clear_on_top[B])                                                              //A can be placed on top of B
+            {
+                new_state = new State();                                                                    //initialize & construct new state 
+                new_state.on_top_of.Add(A, B);
+                new_state.on_top_of.Add(B, current_state.on_top_of[B]);
+                new_state.on_top_of.Add(C, current_state.on_top_of[C]);
+
+                new_state.h = current_state.h - 1;
+                new_state.g = current_state.g + 1;
+
+                new_state.clear_on_top.Add(B, false);
+                new_state.clear_on_top.Add(A, true);
+                if (aboveBlock == C)
+                {
+                    new_state.clear_on_top.Add(C, true);
+                }
+                else
+                {
+                    new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                }
+
+                if (new_state.ValidMove())
+                {                                                                                           //check for best move
+                    new_state.parent = current_state;                                                       //keep previous state
+                    children.Add(new_state);
+                }
+            }
+            else
+            {
+                //--------------------------------------move on the table-------------------------------------
+                if (aboveBlock != Table)
+                {
+                    new_state = new State();
+
+                    new_state.on_top_of.Add(A, Table);
+                    new_state.on_top_of.Add(B, current_state.on_top_of[B]);
+                    new_state.on_top_of.Add(C, current_state.on_top_of[C]);
+
+                    new_state.h = current_state.h - 1;
+                    new_state.g = current_state.g + 1;
+
+                    new_state.clear_on_top.Add(A, true);
+                    if (aboveBlock == B)
+                    {
+                        new_state.clear_on_top.Add(B, true);
+                        new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                    }
+                    else if (aboveBlock == C)
+                    {
+                        new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                        new_state.clear_on_top.Add(C, true);
+                    }
+                    else
+                    {
+                        new_state.clear_on_top.Add(B, current_state.clear_on_top[B]);
+                        new_state.clear_on_top.Add(C, current_state.clear_on_top[C]);
+                    }
+
+                    if (new_state.ValidMove())
+                    {                                                                                               //check for best move
+                        new_state.parent = current_state;                                                           //keep previous state
+                        children.Add(new_state);
+                    }
+                }
+            }
+        }
+        if (children.Count >= 2)
+        {
+            foreach (State child in children)
+            {
+                if (child.on_top_of[A] == Table && child.on_top_of[B] == Table && child.on_top_of[C] == Table)
+                {
+                    children.Remove(child);                                                                     //if another best move exists (than placing all blocks on the table)
+                    break;
+                }
+            }
+        }
         return children;
     }
 
@@ -202,5 +491,25 @@ public class Astar : MonoBehaviour
             return false;
         }
 
+        public bool ValidMove()
+        {
+            if (!(flag) && on_top_of[C] == Table)
+            {
+                flag = true;
+                return true;
+            }
+
+            if (flag)                                                                                       //C is on the table, select the next best move
+            {
+                if ((on_top_of[C] == Table && on_top_of[B] == C && on_top_of[A] == B) ||
+                    (on_top_of[C] == Table && on_top_of[B] == C) ||
+                    (on_top_of[A] == Table && on_top_of[B] == Table && on_top_of[C] == Table))
+                {
+
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

@@ -101,6 +101,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("A* search started...");
         menu.SetActive(false);
         Astar.State solution = Astar.Search(A, B, C, Table);
-        //Astar.PrintSolution(solution);
+        Astar.PrintSolution(solution);
     }
 }

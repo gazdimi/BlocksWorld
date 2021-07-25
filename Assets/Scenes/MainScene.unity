@@ -516,7 +516,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   menu: {fileID: 592675365}
-  yourButton: {fileID: 1407809123}
   retry_canvas: {fileID: 509294149}
 --- !u!1 &592675365
 GameObject:
