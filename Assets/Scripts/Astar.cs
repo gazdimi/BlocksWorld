@@ -69,6 +69,8 @@ public class Astar : MonoBehaviour
         }
         else if (movement.Count == 0 && retry != 0)
         { //solution done
+            flag = false;
+            movement.Clear();
             retry_canvas.SetActive(true);
         }
     }

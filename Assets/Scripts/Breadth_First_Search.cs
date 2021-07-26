@@ -68,7 +68,10 @@ public class Breadth_First_Search : MonoBehaviour
                 }
             }
         }
-        else if(movement.Count==0 && retry != 0){ //solution done
+        else if(movement.Count==0 && retry != 0)
+        { //solution done
+            flag = false;
+            movement.Clear();
            retry_canvas.SetActive(true);
         }
     }
