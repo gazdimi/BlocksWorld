@@ -21,53 +21,55 @@ public class GameManager : MonoBehaviour
         else if (game != this) {
             Destroy(this);
         }
-        RandomPositions();
+        RandomPositions();																									//place the blocks in random positions
     }
 
     public void RandomPositions() {
         //x: 0, y: from 0.5 to 2.5 (step 1.0), z: from -1 to 2 (step 1.5)
         float x = 0f;
-        List<float> y = new List<float> { 0.5f, 1.5f, 2.5f };
+        List<float> y = new List<float> { 0.5f, 1.5f, 2.5f };																//initialize cords for choosing random positions
         List<float> z = new List<float> { -1f, 0.5f, 2f };
 
         List<List<int>> combinations = new List<List<int>> { new List<int> { 3 }, new List<int> { 1, 2 }, new List<int> { 2, 1 }, new List<int> { 1, 1, 1 } };
-        List<int> randomChoice = combinations[new System.Random().Next(combinations.Count)];
+        List<int> randomChoice = combinations[new System.Random().Next(combinations.Count)];								//select random placement
         List<GameObject> letters = new List<GameObject> { A, B, C };
+		
+		//-------------------------------------------------construct the random placement-----------------------------------
         if (randomChoice.Count == 1)                                                                                        //single stack of blocks
         {
             while (letters.Count != 0)
             {
-                GameObject randomG = letters[new System.Random().Next(letters.Count)];
+                GameObject randomG = letters[new System.Random().Next(letters.Count)];										//select random block
                 randomG.transform.position = new Vector3(x, y[0], z[0]);
                 y.RemoveAt(0);
-                letters.Remove(randomG);                                                                                    //set its position, then remove it
+                letters.Remove(randomG);                                                                                    //set block's position, then remove it
             }
         }
         else if (randomChoice.Count == 2)                                                                                   //two stacks of blocks
         {
             if (randomChoice[0] == 1)                                                                                       //first stack has 1 block, second stack has 2 blocks
             {
-                GameObject randomG = letters[new System.Random().Next(letters.Count)];
+                GameObject randomG = letters[new System.Random().Next(letters.Count)];										//select random block
                 randomG.transform.position = new Vector3(x, y[0], z[0]);
-                letters.Remove(randomG);
+                letters.Remove(randomG);																					//set block's position, then remove it
 
                 while (letters.Count != 0)
                 {
                     randomG = letters[new System.Random().Next(letters.Count)];
                     randomG.transform.position = new Vector3(x, y[0], z[1]);
                     y.RemoveAt(0);
-                    letters.Remove(randomG);
+                    letters.Remove(randomG);																				//set block's position, then remove it
                 }
             }
             else
-            {                                                                                                          //first stack has 2 blocks, second stack has 1 block
+            {                                                                                                          		//first stack has 2 blocks, second stack has 1 block
                 GameObject randomG;
                 while (letters.Count != 1)                                                                                  //keep one remaining block in order to place it in the 2nd stack
                 {
-                    randomG = letters[new System.Random().Next(letters.Count)];
+                    randomG = letters[new System.Random().Next(letters.Count)];												//select random block
                     randomG.transform.position = new Vector3(x, y[0], z[0]);
                     y.RemoveAt(0);
-                    letters.Remove(randomG);
+                    letters.Remove(randomG);																				//set block's position, then remove it
                 }
 
                 randomG = letters[new System.Random().Next(letters.Count)];
@@ -75,13 +77,13 @@ public class GameManager : MonoBehaviour
             }
         }
         else
-        {                                                                                                             //three stacks of blocks
+        {                                                                                                             		//three separated stacks of blocks
             while (letters.Count != 0)
             {
-                GameObject randomG = letters[new System.Random().Next(letters.Count)];
+                GameObject randomG = letters[new System.Random().Next(letters.Count)];										//select random block
                 randomG.transform.position = new Vector3(x, y[0], z[0]);
                 z.RemoveAt(0);
-                letters.Remove(randomG);
+                letters.Remove(randomG);																					//set block's position, then remove it
             }
         }
     }
