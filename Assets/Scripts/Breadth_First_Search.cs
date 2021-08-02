@@ -15,7 +15,7 @@ public class Breadth_First_Search : MonoBehaviour
     public float speed = 1.0f;                                                                                  // Adjust the speed for the application
     private static List<KeyValuePair<GameObject, GameObject>> movement = new List<KeyValuePair<GameObject, GameObject>>(); //key = start, value = target   
     private static bool flag = false;
-    private int retry = 0;
+    private static int retry = 0;
 
     void Update()
     {
@@ -70,9 +70,13 @@ public class Breadth_First_Search : MonoBehaviour
         }
         else if(movement.Count==0 && retry != 0)
         { //solution done
-            flag = false;
-            movement.Clear();
-           retry_canvas.SetActive(true);
+           movement.Clear();
+           retry = 0;
+           flag = false;
+           if(flag==false && retry==0 && movement.Count == 0)
+           {
+                retry_canvas.SetActive(true);
+           }
         }
     }
 

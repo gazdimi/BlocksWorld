@@ -15,7 +15,7 @@ public class Astar : MonoBehaviour
     public float speed = 1.0f;                                                                                  // Adjust the speed for the application
     private static List<KeyValuePair<GameObject, GameObject>> movement = new List<KeyValuePair<GameObject, GameObject>>(); //key = start, value = target   
     private static bool flag = false;
-    private int retry = 0;
+    private static int retry = 0;
 
     void Update()
     {
@@ -68,10 +68,15 @@ public class Astar : MonoBehaviour
             }
         }
         else if (movement.Count == 0 && retry != 0)
-        { //solution done
-            flag = false;
+        { 
+            //solution done
             movement.Clear();
-            retry_canvas.SetActive(true);
+            retry = 0;
+            flag = false;
+            if (flag == false && retry == 0 && movement.Count == 0)
+            {
+                retry_canvas.SetActive(true);
+            }
         }
     }
 
